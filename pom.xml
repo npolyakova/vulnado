@@ -73,6 +73,30 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>4.2.3</version>
+				<configuration>
+					<!-- Форматы отчётов -->
+					<outputFormats>xml,html</outputFormats>
+
+					<!-- Пути для отчётов (необязательно) -->
+					<xmlOutput>true</xmlOutput>
+					<xmlOutputDirectory>target/spotbugs-reports</xmlOutputDirectory>
+
+					<htmlOutput>true</htmlOutput>
+					<htmlOutputDirectory>target/spotbugs-reports</htmlOutputDirectory>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>com.github.spotbugs</groupId>
+						<artifactId>spotbugs</artifactId>
+						<version>4.2.3</version>
+						<type>pom</type>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
 
