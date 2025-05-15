@@ -53,10 +53,17 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           ENDDAY=$(date -d "+${DEFECTDOJO_ENGAGEMENT_PERIOD} days" +%Y-%m-%d)
         
-          RESPONSE=$(curl --location --request POST 'http://176.108.253.3:8081/api/v2/engagements/' \
+          RESPONSE=$(curl -s -X POST 'http://176.108.253.3:8081/api/v2/engagements/' \
             -H "Authorization: Token 7de6d211f1c1f164eddb07a9cc8714b07584c0aa" \
-            -d '{"name": "CI/CD engagement 2","target_start": ${{ TODAY }},"target_end": ${{ ENDDAY }},"status": "In Progress","engagement_type": "CI/CD","product": 1}'
-
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "CI/CD engagement 2",
+              "target_start": "'"$TODAY"'",
+              "target_end": "'"$ENDDAY"'",
+              "status": "In Progress",
+              "engagement_type": "CI/CD",
+              "product": 1
+              }')
           ENGAGEMENT_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
           echo "ENGAGEMENT_ID=$ENGAGEMENT_ID" >> $GITHUB_ENV
           echo "id=$ENGAGEMENT_ID" >> $GITHUB_OUTPUT
