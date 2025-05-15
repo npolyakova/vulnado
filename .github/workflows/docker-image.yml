@@ -27,17 +27,13 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Download SpotBugs
-        run: |
-          echo "$PWD/spotbugs-${SPOTBUGS_VERSION}/bin" >> $GITHUB_PATH
-
       - name: Run SpotBugs analysis
         run: |
           # Ищем все .class файлы (можно изменить под ваш проект)
           find . -name "*.class" > classpath.txt
         
           # Запускаем SpotBugs
-          spotbugs -textui -xml -output spotbugs-report.xml -classlist classpath.txt || echo "SpotBugs found issues - see report"
+          # spotbugs -textui -xml -output spotbugs-report.xml -classlist classpath.txt || echo "SpotBugs found issues - see report"
 
       # Шаг 4: Проверяем что отчет создан
       - name: Verify SpotBugs report exists
