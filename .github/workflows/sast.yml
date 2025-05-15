@@ -16,7 +16,6 @@ env:
 jobs:
   publish_sast:
     runs-on: ubuntu-latest
-    needs: [create_engagement]  # Assuming create_engagement is the job name from previous workflow
     if: |
       env.DEFECTDOJO_NOT_ON_MASTER != 'true' || github.ref != 'refs/heads/master' &&
       !contains(env.SAST_EXCLUDED_ANALYZERS, 'spotbugs') &&
