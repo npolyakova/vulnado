@@ -31,7 +31,10 @@ jobs:
         run: sudo apt-get install -y maven
 
       - name: Run SpotBugs via Maven
-        run: mvn spotbugs:spotbugs
+        run: |
+          mvn spotbugs:spotbugs
+          echo "SpotBugs report generated at:"
+          ls -la target/spotbugs*
         
       # Шаг 4: Проверяем что отчет создан
       - name: Verify SpotBugs report exists
