@@ -32,6 +32,7 @@ jobs:
 
       - name: Run SpotBugs via Maven
         run: |
+          mvn compile -f pom.xml
           mvn spotbugs:spotbugs
           echo "SpotBugs report generated at:"
           ls -la target*
