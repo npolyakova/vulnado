@@ -30,6 +30,7 @@ jobs:
       - name: Download SpotBugs
         run: |
           wget https://repo.maven.apache.org/maven2/com/github/spotbugs/spotbugs/${SPOTBUGS_VERSION}/spotbugs-${SPOTBUGS_VERSION}.zip
+          chmod +x spotbugs-4.2.3/bin/spotbugs
           unzip spotbugs-${SPOTBUGS_VERSION}.zip
           echo "$PWD/spotbugs-${SPOTBUGS_VERSION}/bin" >> $GITHUB_PATH
 
