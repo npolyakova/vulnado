@@ -27,19 +27,14 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Run SpotBugs analysis
-        run: |
-          # Ищем все .class файлы (можно изменить под ваш проект)
-          find . -name "*.class" > classpath.txt
+      - name: Run SpotBugs via Maven
+        run: mvn spotbugs:spotbugs
         
-          # Запускаем SpotBugs
-          # spotbugs -textui -xml -output spotbugs-report.xml -classlist classpath.txt || echo "SpotBugs found issues - see report"
-
       # Шаг 4: Проверяем что отчет создан
       - name: Verify SpotBugs report exists
         id: report-check
         run: |
-          if [ -f "spotbugs-report.xml" ]; then
+          if [ -f "target/spotbugs-reports/spotbugs.xml" ]; then
             echo "report_exists=true" >> $GITHUB_OUTPUT
           else
             echo "report_exists=false" >> $GITHUB_OUTPUT
@@ -63,7 +58,7 @@ jobs:
             --form "verified=true" \
             --form "scan_type=$DEFECTDOJO_SCAN_TYPE" \
             --form "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
-            --form "file=@spotbugs-report.xml" \
+            --form "file=@target/spotbugs-reports/spotbugs.xml" \
             --form "close_old_findings=true" \
             --form "push_to_jira=false" \
             --form "test_type=$DEFECTDOJO_SCAN_TEST_TYPE" \
