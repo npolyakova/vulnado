@@ -1,5 +1,6 @@
 name: DefectDojo Create Engagement
-on: [push]
+on: 
+  workflow_dispatch:
 
 env:
   DEFECTDOJO_ENGAGEMENT_PERIOD: 7
