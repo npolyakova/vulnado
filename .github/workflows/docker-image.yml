@@ -65,7 +65,6 @@ jobs:
             --form "scan_type=$DEFECTDOJO_SCAN_TYPE" \
             --form "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
             --form "file=@target/spotbugsXml.xml" \
-            --form "close_old_findings=true" \
             --form "push_to_jira=false" \
             --form "test_type=$DEFECTDOJO_SCAN_TEST_TYPE" \
             
