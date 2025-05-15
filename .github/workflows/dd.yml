@@ -1,0 +1,67 @@
+name: DefectDojo Create Engagement
+on: [push]
+
+env:
+  DEFECTDOJO_ENGAGEMENT_PERIOD: 7
+  DEFECTDOJO_ENGAGEMENT_STATUS: "Not Started"
+  DEFECTDOJO_ENGAGEMENT_BUILD_SERVER: null
+  DEFECTDOJO_ENGAGEMENT_SOURCE_CODE_MANAGEMENT_SERVER: null
+  DEFECTDOJO_ENGAGEMENT_ORCHESTRATION_ENGINE: null
+  DEFECTDOJO_ENGAGEMENT_DEDUPLICATION_ON_ENGAGEMENT: "false"
+  DEFECTDOJO_ENGAGEMENT_THREAT_MODEL: "true"
+  DEFECTDOJO_ENGAGEMENT_API_TEST: "true"
+  DEFECTDOJO_ENGAGEMENT_PEN_TEST: "true"
+  DEFECTDOJO_ENGAGEMENT_CHECK_LIST: "true"
+  DEFECTDOJO_NOT_ON_MASTER: "false"
+
+jobs:
+  create_engagement:
+    runs-on: ubuntu-latest
+    if: ${{ env.DEFECTDOJO_NOT_ON_MASTER != 'true' || github.ref != 'refs/heads/master' }}
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq coreutils
+          
+      - name: Set date variables
+        run: |
+          echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+          echo "ENDDAY=$(date -d "+$DEFECTDOJO_ENGAGEMENT_PERIOD days" +%Y-%m-%d)" >> $GITHUB_ENV
+          
+      - name: Create DefectDojo engagement
+        id: defectdojo
+        run: |
+          ENGAGEMENTID=$(curl --fail --location --request POST "$DEFECTDOJO_URL/engagements/" \
+            --header "Authorization: Token $DEFECTDOJO_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data-raw "{
+              \"tags\": [\"GITHUB-ACTIONS\"],
+              \"name\": \"#$GITHUB_RUN_ID\",
+              \"description\": \"${{ github.event.head_commit.message }}\",
+              \"version\": \"${{ github.ref_name }}\",
+              \"first_contacted\": \"${{ env.TODAY }}\",
+              \"target_start\": \"${{ env.TODAY }}\",
+              \"target_end\": \"${{ env.ENDDAY }}\",
+              \"reason\": \"string\",
+              \"tracker\": \"${{ github.repository_url }}/issues\",
+              \"threat_model\": \"${{ env.DEFECTDOJO_ENGAGEMENT_THREAT_MODEL }}\",
+              \"api_test\": \"${{ env.DEFECTDOJO_ENGAGEMENT_API_TEST }}\",
+              \"pen_test\": \"${{ env.DEFECTDOJO_ENGAGEMENT_PEN_TEST }}\",
+              \"check_list\": \"${{ env.DEFECTDOJO_ENGAGEMENT_CHECK_LIST }}\",
+              \"status\": \"${{ env.DEFECTDOJO_ENGAGEMENT_STATUS }}\",
+              \"engagement_type\": \"CI/CD\",
+              \"build_id\": \"$GITHUB_RUN_ID\",
+              \"commit_hash\": \"${{ github.sha }}\",
+              \"branch_tag\": \"${{ github.ref_name }}\",
+              \"deduplication_on_engagement\": \"${{ env.DEFECTDOJO_ENGAGEMENT_DEDUPLICATION_ON_ENGAGEMENT }}\",
+              \"product\": \"$DEFECTDOJO_PRODUCTID\",
+              \"source_code_management_uri\": \"${{ github.repository_url }}\",
+              \"build_server\": ${{ env.DEFECTDOJO_ENGAGEMENT_BUILD_SERVER }},
+              \"source_code_management_server\": ${{ env.DEFECTDOJO_ENGAGEMENT_SOURCE_CODE_MANAGEMENT_SERVER }},
+              \"orchestration_engine\": ${{ env.DEFECTDOJO_ENGAGEMENT_ORCHESTRATION_ENGINE }}
+            }" | jq -r '.id')
+          echo "ENGAGEMENTID=$ENGAGEMENTID" >> $GITHUB_ENV
+          
+      - name: Output engagement ID
+        run: echo "DefectDojo Engagement ID: ${{ env.ENGAGEMENTID }}"
