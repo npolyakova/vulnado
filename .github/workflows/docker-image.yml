@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-env:
-  DEFECTDOJO_SCAN_TYPE: "SpotBugs Scan"
-  DEFECTDOJO_SCAN_TEST_TYPE: "GitHub Actions SpotBugs Scan"
-  SPOTBUGS_VERSION: "4.2.3"
-
 jobs:
   build:
     runs-on: self-hosted
@@ -20,51 +15,3 @@ jobs:
       - name: run app
         run: |
           sudo docker compose up -d --build
-
-      - uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Install Maven
-        run: sudo apt-get install -y maven
-
-      - name: Run SpotBugs via Maven
-        run: |
-          mvn compile -f pom.xml
-          mvn spotbugs:spotbugs
-          echo "SpotBugs report generated at:"
-          ls -la target*
-        
-      # Шаг 4: Проверяем что отчет создан
-      - name: Verify SpotBugs report exists
-        id: report-check
-        run: |
-          if [ -f "target/spotbugsXml.xml" ]; then
-            echo "report_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "report_exists=false" >> $GITHUB_OUTPUT
-            echo "::warning::SpotBugs report not generated!"
-          fi
-        
-      - name: Upload to DefectDojo
-        if: steps.report-check.outputs.report_exists == 'true'
-        env:
-          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
-          DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
-          DEFECTDOJO_ENGAGEMENT_ID: ${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}
-        run: |
-          TODAY=$(date +%Y-%m-%d)
-        
-          curl --fail --location --request POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
-            --header "Authorization: Token $DEFECTDOJO_TOKEN" \
-            --form "minimum_severity=Info" \
-            --form "active=true" \
-            --form "verified=true" \
-            --form "scan_type=$DEFECTDOJO_SCAN_TYPE" \
-            --form "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
-            --form "file=@target/spotbugsXml.xml" \
-            --form "push_to_jira=false" \
-            --form "test_type=$DEFECTDOJO_SCAN_TEST_TYPE" \
-            
