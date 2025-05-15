@@ -34,7 +34,7 @@ jobs:
         run: |
           mvn spotbugs:spotbugs
           echo "SpotBugs report generated at:"
-          ls -la target/spotbugs*
+          ls -la target*
         
       # Шаг 4: Проверяем что отчет создан
       - name: Verify SpotBugs report exists
