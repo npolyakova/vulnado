@@ -26,12 +26,9 @@ jobs:
       - name: Install Maven
         run: sudo apt-get install -y maven
 
-      - name: Compile project
-        run: |
-          mvn compile -f pom.xml
-
       - name: Run SonarQube Scan
         run: |
+          mvn compile -f pom.xml
           mvn sonar:sonar \
             -Dsonar.host.url=http://176.108.253.3:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
