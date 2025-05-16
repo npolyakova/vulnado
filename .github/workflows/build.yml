@@ -2,7 +2,7 @@ name: build
 
 on:
   workflow_run:
-    workflows: [ "sonar-check", "spotbugs-check" ]
+    workflows: [ "sonar-check" ]
     types: [ completed ]
     branches: [ "master" ]
 

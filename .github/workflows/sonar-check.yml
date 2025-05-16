@@ -1,9 +1,10 @@
 name: sonar-check
 
 on:
-  push:
-  pull_request:
-  workflow_dispatch:
+  on:
+    workflow_run:
+      workflows: [ "spotbugs-check" ]
+      types: [ completed ]
 
 env:
   DEFECTDOJO_SCAN_TYPE: "SonarQube Scan"
