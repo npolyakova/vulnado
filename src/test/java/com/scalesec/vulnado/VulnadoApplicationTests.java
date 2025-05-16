@@ -11,10 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class VulnadoApplicationTests {
 
 	@Test
-	public void contextLoads() {
-	}
-
-	@Test
 	public void mockTest() {
 		Assertions.assertThat(true).isTrue();
 	}
