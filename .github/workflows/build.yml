@@ -4,11 +4,12 @@ on:
   workflow_run:
     workflows: [ "sonar-check", "spotbugs-check" ]
     types: [ completed ]
-    branches: [ main ]
+    branches: [ "master" ]
 
 jobs:
   build:
     runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
       
