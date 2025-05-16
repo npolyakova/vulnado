@@ -78,15 +78,8 @@
 				<artifactId>spotbugs-maven-plugin</artifactId>
 				<version>4.2.3</version>
 				<configuration>
-					<!-- Форматы отчётов -->
-					<outputFormats>xml,html</outputFormats>
-
-					<!-- Пути для отчётов (необязательно) -->
 					<xmlOutput>true</xmlOutput>
 					<xmlOutputDirectory>target/spotbugs-reports</xmlOutputDirectory>
-
-					<htmlOutput>true</htmlOutput>
-					<htmlOutputDirectory>target/spotbugs-reports</htmlOutputDirectory>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -96,6 +89,11 @@
 						<type>pom</type>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>  <!-- Версия, работающая с Java 11 -->
 			</plugin>
 		</plugins>
 	</build>
