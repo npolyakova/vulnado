@@ -52,7 +52,7 @@ jobs:
             -H "Authorization: Token ${DEFECTDOJO_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{
-              "name": "CI/CD engagement 3",
+              "name": "CI/CD engagement SonarQube",
               "target_start": "'"$TODAY"'",
               "target_end": "'"$ENDDAY"'",
               "status": "In Progress",
