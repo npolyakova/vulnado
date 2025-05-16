@@ -66,6 +66,6 @@ jobs:
             --form "verified=true" \
             --form "scan_type=$DEFECTDOJO_SCAN_TYPE" \
             --form "engagement=$ENGAGEMENT_ID" \
-            --form "file=@target/spotbugsXml.xml" \
+            --form "file=@sonarqube_report.json" \
             --form "push_to_jira=false" \
             --form "test_type=$DEFECTDOJO_SCAN_TEST_TYPE"
