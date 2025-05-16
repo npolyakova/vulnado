@@ -37,7 +37,7 @@ jobs:
           curl -u ${{ secrets.SONAR_TOKEN }}: "http://176.108.253.3:9000/api/issues/search?componentKeys=com.scalesec:vulnado&ps=500&format=json" > sonarqube_report.json
 
       - name: Upload report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sonarqube-report
           path: sonarqube_report.json

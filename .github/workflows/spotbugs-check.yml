@@ -45,10 +45,32 @@ jobs:
             echo "::warning::SpotBugs report not generated!"
           fi
 
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: spotbugs-report
+          path: spotbugsXml.xml
+          retention-days: 7
+
       - name: Create an engagement
-        if: steps.report-check.outputs.report_exists == 'true'
-        uses: .github/workflows/create-engagement.yml@main
-        secrets: inherit
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          ENDDAY=$(date -d "+${DEFECTDOJO_ENGAGEMENT_PERIOD} days" +%Y-%m-%d)
+
+          RESPONSE=$(curl -s -X POST '$DEFECTDOJO_URL/api/v2/engagements/' \
+            -H "Authorization: Token $DEFECTDOJO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "CI/CD engagement 3",
+              "target_start": "'"$TODAY"'",
+              "target_end": "'"$ENDDAY"'",
+              "status": "In Progress",
+              "engagement_type": "CI/CD",
+              "product": 1
+              }')
+          ENGAGEMENT_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+          echo "ENGAGEMENT_ID=$ENGAGEMENT_ID" >> $GITHUB_ENV
+          echo "id=$ENGAGEMENT_ID" >> $GITHUB_OUTPUT
         
       - name: Upload to DefectDojo
         run: |        
