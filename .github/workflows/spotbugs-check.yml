@@ -2,7 +2,7 @@ name: spotbugs-check
 
 on:
   push:
-  pull-request:
+  pull_request:
 
 env:
   DEFECTDOJO_SCAN_TYPE: "SpotBugs Scan"
