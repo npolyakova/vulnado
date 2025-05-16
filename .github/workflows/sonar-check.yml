@@ -1,0 +1,14 @@
+name: sonar-check
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    - name: Run SonarQube Scan
+      run: |
+        mvn sonar:sonar \
+          -Dsonar.host.url=http://176.108.253.3:9000 \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
