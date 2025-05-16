@@ -13,7 +13,6 @@ public class VulnadoApplicationTests {
 	@Test
 	public void mockTest() {
 		Assertions.assertThat(true).isTrue();
-		Assertions.assertThat(false).isFalse();
 	}
 
 }
