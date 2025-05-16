@@ -5,6 +5,14 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+env:
+  DEFECTDOJO_SCAN_TYPE: "SonarQube Scan"
+  DEFECTDOJO_SCAN_TEST_TYPE: "GitHub Actions SonarQube Scan"
+  SPOTBUGS_VERSION: "4.2.3"
+  DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+  DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+  DEFECTDOJO_ENGAGEMENT_PERIOD: 7
+
 jobs:
   sonar:
     runs-on: self-hosted
@@ -14,3 +22,40 @@ jobs:
           mvn sonar:sonar \
             -Dsonar.host.url=http://176.108.253.3:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+      - name: Get report
+        run: |
+          curl -u ${{ secrets.SONAR_TOKEN }}: "http://176.108.253.3:9000/api/issues/search?componentKeys=com.scalesec:vulnado&ps=500&format=json" > sonarqube_report.json
+
+      - name: Create an engagement
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          ENDDAY=$(date -d "+${DEFECTDOJO_ENGAGEMENT_PERIOD} days" +%Y-%m-%d)
+
+          RESPONSE=$(curl -s -X POST 'http://176.108.253.3:8081/api/v2/engagements/' \
+            -H "Authorization: Token 7de6d211f1c1f164eddb07a9cc8714b07584c0aa" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "CI/CD engagement 3",
+              "target_start": "'"$TODAY"'",
+              "target_end": "'"$ENDDAY"'",
+              "status": "In Progress",
+              "engagement_type": "CI/CD",
+              "product": 1
+              }')
+          ENGAGEMENT_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+          echo "ENGAGEMENT_ID=$ENGAGEMENT_ID" >> $GITHUB_ENV
+          echo "id=$ENGAGEMENT_ID" >> $GITHUB_OUTPUT
+
+      - name: Upload to DefectDojo
+        run: |
+          curl --fail --location --request POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
+            --header "Authorization: Token $DEFECTDOJO_TOKEN" \
+            --form "minimum_severity=Info" \
+            --form "active=true" \
+            --form "verified=true" \
+            --form "scan_type=$DEFECTDOJO_SCAN_TYPE" \
+            --form "engagement=$ENGAGEMENT_ID" \
+            --form "file=@target/spotbugsXml.xml" \
+            --form "push_to_jira=false" \
+            --form "test_type=$DEFECTDOJO_SCAN_TEST_TYPE"
