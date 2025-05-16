@@ -2,8 +2,6 @@ name: spotbugs-check
 
 on:
   push:
-  pull_request:
-  workflow_dispatch:
 
 env:
   DEFECTDOJO_SCAN_TYPE: "SpotBugs Scan"
