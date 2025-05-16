@@ -1,11 +1,10 @@
 name: build
 
 on:
-  on:
-    workflow_run:
-      workflows: [ "sonar-check", "spotbugs-check" ]
-      types: [ completed ]
-      branches: [ main ]
+  workflow_run:
+    workflows: [ "sonar-check", "spotbugs-check" ]
+    types: [ completed ]
+    branches: [ main ]
 
 jobs:
   build:
