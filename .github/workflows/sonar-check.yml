@@ -17,6 +17,19 @@ jobs:
   sonar:
     runs-on: self-hosted
     steps:
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install Maven
+        run: sudo apt-get install -y maven
+
+      - name: Compile project
+        run: |
+          mvn compile -f pom.xml
+
       - name: Run SonarQube Scan
         run: |
           mvn sonar:sonar \
