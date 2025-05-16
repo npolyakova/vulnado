@@ -2,6 +2,7 @@ name: sonar-check
 
 on:
   push:
+  pull-request:
 
 env:
   DEFECTDOJO_SCAN_TYPE: "SonarQube Scan"
