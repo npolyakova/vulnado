@@ -48,8 +48,8 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           ENDDAY=$(date -d "+${DEFECTDOJO_ENGAGEMENT_PERIOD} days" +%Y-%m-%d)
 
-          RESPONSE=$(curl -s -X POST '$DEFECTDOJO_URL/api/v2/engagements/' \
-            -H "Authorization: Token $DEFECTDOJO_TOKEN" \
+          RESPONSE=$(curl -s -X POST '{$DEFECTDOJO_URL}/api/v2/engagements/' \
+            -H "Authorization: Token {$DEFECTDOJO_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{
               "name": "CI/CD engagement 3",
