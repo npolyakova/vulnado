@@ -6,7 +6,7 @@ $(document).ready(function(){
 
     $.ajax({
       type: 'POST',
-      url: "http://localhost:8080/login",
+      url: "http://176.108.253.3:8080/login",
       data: JSON.stringify(payload),
       dataType: "json",
       contentType: "application/json"
