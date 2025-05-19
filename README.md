@@ -1,4 +1,4 @@
-# Vulnado - Intentionally Vulnerable Java Application(secret_test#2)
+# Vulnado - Intentionally Vulnerable Java Application(secret_test#3)
 
 This application and exercises will take you through some of the OWASP top 10 Vulnerabilities and how to prevent them.
 
