@@ -34,8 +34,7 @@ jobs:
 
       - name: Get report
         run: |
-          curl -H "X-Api-Key: odt_zn97YlI0_LKFt7mznDlAtRdD3BsNc6WjOHS1YiPBB": "http://83.222.27.166:8080/api/v1/finding/project/55eef397-55b2-49a8-a409-a7b92ad1db24/export" > dt_report.json
-
+          curl -v -L 'http://83.222.27.166:8080/api/v1/finding/project/55eef397-55b2-49a8-a409-a7b92ad1db24/export' -H 'X-Api-Key: odt_zn97YlI0_LKFt7mznDlAtRdD3BsNc6WjOHS1YiPBB' > dt_report.json
       - name: Create an engagement
         run: |
           TODAY=$(date +%Y-%m-%d)
