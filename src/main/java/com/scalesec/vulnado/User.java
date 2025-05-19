@@ -1,13 +1,9 @@
 package com.scalesec.vulnado;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 
@@ -39,36 +35,27 @@ public class User {
   }
 
   public static User fetch(String un) {
-    PreparedStatement stmt = null;
+    Statement stmt = null;
     User user = null;
-    Connection cxn = null;
     try {
-      cxn = Postgres.connection();
+      Connection cxn = Postgres.connection();
+      stmt = cxn.createStatement();
       System.out.println("Opened database successfully");
 
-      String query = "select * from users where username = ? limit 1";
-      stmt = cxn.prepareStatement(query);
-      stmt.setString(1, un);
-
-      System.out.println("Query: " + query + " with username: " + un);
-      ResultSet rs = stmt.executeQuery();
-
+      String query = "select * from users where username = '" + un + "' limit 1";
+      System.out.println(query);
+      ResultSet rs = stmt.executeQuery(query);
       if (rs.next()) {
         String user_id = rs.getString("user_id");
         String username = rs.getString("username");
         String password = rs.getString("password");
         user = new User(user_id, username, password);
       }
+      cxn.close();
     } catch (Exception e) {
       e.printStackTrace();
-      System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      System.err.println(e.getClass().getName()+": "+e.getMessage());
     } finally {
-      try {
-        if (stmt != null) stmt.close();
-        if (cxn != null) cxn.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
       return user;
     }
   }
