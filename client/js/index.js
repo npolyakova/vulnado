@@ -27,9 +27,7 @@ $(document).ready(function(){
     $.get("http://176.108.253.3:8080/comments", function(data){
       $('#comments-container').html('')
       data.forEach(function(comment){
-        if (comment.body.indexOf("<script>") < 0) {
-          $("#comments-container").append(template(comment));
-        }
+        $("#comments-container").append(template(comment));
       });
       setupDeleteCommentHandler();
     });
@@ -38,17 +36,24 @@ $(document).ready(function(){
   //Event Handlers
   $('#submit-comment').click(function(){
     var comment = $('#new-comment').val();
-    var username = localStorage.username;
-    $.ajax({
-      type: "POST",
-      url: "http://176.108.253.3:8080/comments",
-      data: JSON.stringify({username: username, body: comment}),
-      dataType: "json",
-      contentType: "application/json",
-    }).done(function(){
-        $('#new-comment').val('');
-        fetchComments();
-    });
+    if ((/<([^>\s\/]+)[^>]*>/i).test(comment.toLowerCase())) {
+      $('#new-comment')[0].className = "form-control error"
+    } else {
+      if ($('#new-comment')[0].className = "form-control error") {
+        $('#new-comment')[0].className = "form-control"
+      }
+      var username = localStorage.username;
+      $.ajax({
+        type: "POST",
+        url: "http://176.108.253.3:8080/comments",
+        data: JSON.stringify({username: username, body: comment}),
+        dataType: "json",
+        contentType: "application/json",
+      }).done(function(){
+          $('#new-comment').val('');
+          fetchComments();
+      });
+    }
   });
 
   $('#signout').click(function(){

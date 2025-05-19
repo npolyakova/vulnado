@@ -24,6 +24,10 @@ body {
   border-radius: 0 0 .5em .5em
 }
 
+.error {
+  color: #AA4A44
+}
+
 .btn-block {
   margin-top: 10px;
 }

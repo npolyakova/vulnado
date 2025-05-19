@@ -27,8 +27,8 @@
         <div class="col-sm-6">
           <div id="login-form" class="form-signin">
             <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-            <input type="username" id="inputUsername" class="form-control top" placeholder="Username" required autofocus>
-            <input type="password" id="inputPassword" class="form-control bottom" placeholder="Password" required>
+            <input type="username" id="inputUsername" class="form-control top" placeholder="Username" required autofocus onchange="<script>$('#inputUsername')[0].className = 'form-control top'</script>">
+            <input type="password" id="inputPassword" class="form-control bottom" placeholder="Password" required onchange="<script>$('#inputPassword')[0].className = 'form-control button'</script>">
             <button id="btn-login" class="btn btn-lg btn-primary btn-block">Sign in</button>
             <p class="mt-5 mb-3 text-muted">&copy; 2019</p>
           </div>
