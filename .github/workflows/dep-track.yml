@@ -1,4 +1,4 @@
-name: sonar-check
+name: dt-check
 
 on:
   push:
