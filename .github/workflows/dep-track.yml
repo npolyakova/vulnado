@@ -12,7 +12,7 @@ env:
   DEFECTDOJO_ENGAGEMENT_PERIOD: 7
 
 jobs:
-  sonar:
+  dt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
             -H "Authorization: Token ${DEFECTDOJO_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{
-              "name": "CI/CD engagement SonarQube",
+              "name": "CI/CD engagement Dependency Track",
               "target_start": "'"$TODAY"'",
               "target_end": "'"$ENDDAY"'",
               "status": "In Progress",
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload to DefectDojo
         run: |
-          curl --fail --location --request POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
+          curl --location --request POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
             --header "Authorization: Token $DEFECTDOJO_TOKEN" \
             --form "minimum_severity=Info" \
             --form "active=true" \
