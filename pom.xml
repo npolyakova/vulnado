@@ -121,7 +121,7 @@
 					<includeLicenseText>false</includeLicenseText>
 					<outputReactorProjects>true</outputReactorProjects>
 					<outputFormat>all</outputFormat>
-					<outputName>CycloneDX-Sbom</outputName>
+					<outputName>bom</outputName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -135,6 +135,15 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.github.pmckeown</groupId>
+				<artifactId>dependency-track-maven-plugin</artifactId>
+				<version>1.10.0</version>
+				<configuration>
+					<dependencyTrackBaseUrl>http://83.222.27.166:8080</dependencyTrackBaseUrl>
+					<apiKey>odt_zn97YlI0_LKFt7mznDlAtRdD3BsNc6WjOHS1YiPBB</apiKey>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
