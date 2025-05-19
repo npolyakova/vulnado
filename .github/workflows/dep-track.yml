@@ -30,7 +30,7 @@ jobs:
         run: |
           mvn compile -f pom.xml
           mvn package
-          dependency-track:upload-bom
+          mvn dependency-track:upload-bom -f pom.xml
 
       - name: Get report
         run: |
