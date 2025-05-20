@@ -1,8 +1,9 @@
 name: dt-check
 
 on:
-  push:
-  pull_request:
+#  push:
+#  pull_request:
+  workflow_dispatch:
 
 env:
   DEFECTDOJO_SCAN_TYPE: "Dependency Track Finding Packaging Format (FPF) Export"
