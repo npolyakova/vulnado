@@ -1,0 +1,201 @@
+name: Security Scan Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      origin_id:
+        description: 'Pipeline ID'
+        required: true
+        default: ''
+
+env:
+  API_BASE_URL: 'http://we.ee'
+  UPLOAD_ENDPOINT: '/scanner-reports/upload'
+  GENERATE_ENDPOINT: '/reports/generate'
+  
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    outputs:
+      pipeline_id: ${{ steps.set_ids.outputs.pipeline_id }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set IDs
+        id: set_ids
+        run: |
+          if [[ -n "${{ github.event.inputs.origin_id }}" ]]; then
+            PIPELINE_ID="${{ github.event.inputs.origin_id }}"
+          else
+            PIPELINE_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}"
+          fi
+          echo "pipeline_id=${PIPELINE_ID}" >> $GITHUB_OUTPUT
+          echo "origin_id=${PIPELINE_ID}" >> $GITHUB_ENV
+          echo "Using pipeline ID: ${PIPELINE_ID}"
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install bandit semgrep
+      
+      - name: Setup Trivy
+        run: |
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.49.1_Linux-64bit.deb
+          trivy --version
+      
+      - name: Create reports directory
+        run: mkdir -p reports
+      
+      # Запуск Trivy сканера
+      - name: Run Trivy filesystem scan
+        run: |
+          trivy filesystem \
+            --scanners vuln,secret,misconfig \
+            --format sarif \
+            --output reports/trivy-report.sarif \
+            --exit-code 0 \
+            .
+      
+      # Запуск Bandit (Python)
+      - name: Run Bandit security scanner
+        run: |
+          bandit -r . \
+            -f sarif \
+            -o reports/bandit-report.sarif \
+            --exit-zero \
+            || true
+      
+      # Альтернативный вариант с Semgrep (раскомментировать, если нужен Semgrep вместо Bandit)
+      # - name: Run Semgrep
+      #   run: |
+      #     semgrep ci \
+      #       --config auto \
+      #       --sarif \
+      #       --output reports/semgrep-report.sarif \
+      #       --quiet \
+      #       || true
+      
+      # Загрузка Trivy отчета
+      - name: Upload Trivy report
+        id: upload_trivy
+        continue-on-error: true
+        run: |
+          curl -X 'POST' \
+            "${API_BASE_URL}${UPLOAD_ENDPOINT}" \
+            -H 'accept: application/json' \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'file=@reports/trivy-report.sarif' \
+            -F 'scanner_type=trivy' \
+            -F 'origin_id=${{ env.origin_id }}' \
+            -F 'project_name=${{ github.repository }}' \
+            -F 'user_id=1'
+      
+      # Загрузка Bandit отчета
+      - name: Upload Bandit report
+        id: upload_bandit
+        continue-on-error: true
+        run: |
+          curl -X 'POST' \
+            "${API_BASE_URL}${UPLOAD_ENDPOINT}" \
+            -H 'accept: application/json' \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'file=@reports/bandit-report.sarif' \
+            -F 'scanner_type=bandit' \
+            -F 'origin_id=${{ env.origin_id }}' \
+            -F 'project_name=${{ github.repository }}' \
+            -F 'user_id=1'
+      
+      # Альтернативная загрузка для Semgrep (если используется)
+      # - name: Upload Semgrep report
+      #   run: |
+      #     curl -X 'POST' \
+      #       "${API_BASE_URL}${UPLOAD_ENDPOINT}" \
+      #       -H 'accept: application/json' \
+      #       -H 'Content-Type: multipart/form-data' \
+      #       -F 'file=@reports/semgrep-report.sarif' \
+      #       -F 'scanner_type=semgrep' \
+      #       -F 'origin_id=${{ env.origin_id }}' \
+      #       -F 'project_name=${{ github.repository }}' \
+      #       -F 'user_id=1'
+      
+      # Проверка успешности загрузки отчетов
+      - name: Check upload status
+        if: steps.upload_trivy.outcome == 'failure' || steps.upload_bandit.outcome == 'failure'
+        run: |
+          echo "❌ Failed to upload one or more reports"
+          exit 1
+      
+      # Вызов генерации отчета
+      - name: Generate final report
+        run: |
+          echo "⏳ Generating report for pipeline: ${{ env.origin_id }}"
+          
+          RESPONSE=$(curl -X 'GET' \
+            "${API_BASE_URL}${GENERATE_ENDPOINT}/${{ env.origin_id }}" \
+            -H 'accept: application/json' \
+            -w "%{http_code}" \
+            -o response.json \
+            --silent)
+          
+          if [[ $RESPONSE -eq 200 ]]; then
+            echo "✅ Report generation initiated successfully"
+            cat response.json
+          else
+            echo "❌ Failed to generate report. HTTP Status: ${RESPONSE}"
+            cat response.json
+            exit 1
+          fi
+      
+      # Сохраняем отчеты как артефакты
+      - name: Upload reports as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports-${{ env.origin_id }}
+          path: reports/
+          retention-days: 30
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Pipeline ID: \`${{ env.origin_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Repository: \`${{ github.repository }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Commit SHA: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Scan Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Trivy: ${{ steps.upload_trivy.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Bandit: ${{ steps.upload_bandit.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Report generation initiated" >> $GITHUB_STEP_SUMMARY
+
+  # Альтернативный вариант с параллельным запуском в разных джобах
+  parallel-scanners:
+    runs-on: ubuntu-latest
+    if: false  # Установите true, чтобы использовать параллельные джобы
+    strategy:
+      fail-fast: false
+      matrix:
+        scanner: [trivy, bandit]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup scanner and run
+        run: |
+          echo "Running ${{ matrix.scanner }} scanner"
+          # Здесь аналогичная логика для каждого сканера
