@@ -95,7 +95,7 @@ jobs:
         continue-on-error: true
         run: |
           curl -X 'POST' \
-            "${API_BASE_URL}${UPLOAD_ENDPOINT}" \
+            "https://short-points-love.loca.lt/scanner-reports/upload" \
             -H 'accept: application/json' \
             -H 'Content-Type: multipart/form-data' \
             -F 'file=@reports/trivy-report.sarif' \
@@ -110,7 +110,7 @@ jobs:
         continue-on-error: true
         run: |
           curl -X 'POST' \
-            "${API_BASE_URL}${UPLOAD_ENDPOINT}" \
+            "https://short-points-love.loca.lt/scanner-reports/upload" \
             -H 'accept: application/json' \
             -H 'Content-Type: multipart/form-data' \
             -F 'file=@reports/bandit-report.sarif' \
